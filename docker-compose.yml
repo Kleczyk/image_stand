@@ -1,0 +1,32 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: image-stand-api
+    ports:
+      - "8000:8000"
+    environment:
+      - KIE_API_KEY=${KIE_API_KEY:-}
+      - HOST=0.0.0.0
+      - PORT=8000
+      - IMAGES_DIR=/app/images
+    volumes:
+      - ./images:/app/images
+    command: python -m src.main
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: image-stand-frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+    depends_on:
+      - api
+    volumes:
+      - ./images:/app/images
+    restart: unless-stopped

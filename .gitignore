@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Environment
+.env
+*.env.local
+
+# Testing
+test_*.png
+!test_local_copy.png
+
+# Docker volumes
+images/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# uv
+.python-version
+
