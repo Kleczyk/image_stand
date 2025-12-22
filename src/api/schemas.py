@@ -38,3 +38,10 @@ class HealthResponse(BaseModel):
     status: str
     api_key_configured: bool
     langgraph_enabled: bool = True
+
+
+class SpeechToTextResponse(BaseModel):
+    """Response schema for speech-to-text transcription."""
+    success: bool
+    text: Optional[str] = None
+    error: Optional[str] = None

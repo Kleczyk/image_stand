@@ -19,6 +19,7 @@ class Settings:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._kie_api_key = os.getenv("KIE_API_KEY", "")
+            cls._instance._openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "")
         return cls._instance
     
     @property
@@ -28,6 +29,14 @@ class Settings:
     @kie_api_key.setter
     def kie_api_key(self, value: str):
         self._kie_api_key = value
+    
+    @property
+    def openrouter_api_key(self) -> str:
+        return self._openrouter_api_key
+    
+    @openrouter_api_key.setter
+    def openrouter_api_key(self, value: str):
+        self._openrouter_api_key = value
     
     @property
     def django_secret_key(self) -> str:

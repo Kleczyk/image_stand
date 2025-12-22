@@ -14,11 +14,13 @@ from src.api.schemas import (
     ApiKeyRequest,
     ApiKeyResponse,
     HealthResponse,
+    SpeechToTextResponse,
 )
 from src.graphs.image_generation import run_image_generation
 from src.graphs.image_comparison import run_image_comparison
 from src.services.kie_client import encode_image_to_base64
 from src.services import image_storage
+from src.services.openrouter_client import transcribe_audio
 
 
 @asynccontextmanager
@@ -46,6 +48,7 @@ app = FastAPI(
     - 🎨 **Text-to-Image**: Generate images from text prompts
     - 🖼️ **Image-to-Image**: Transform images with text guidance
     - 📊 **Image Comparison**: Compare two images for similarity (SSIM)
+    - 🎤 **Speech-to-Text**: Convert audio to text using Google Gemini 2.0 Flash Lite via OpenRouter
     - 🔑 **API Key Management**: Runtime API key configuration
     - 🔄 **LangGraph Workflows**: Stateful graph-based processing
     """,
@@ -118,6 +121,7 @@ async def home():
         <ul>
             <li><code>POST /api/generate</code> - Generate image from text (+ optional input image)</li>
             <li><code>POST /api/compare</code> - Compare two images (SSIM algorithm)</li>
+            <li><code>POST /api/speech-to-text</code> - Convert audio to text (WebM, WAV, MP3)</li>
             <li><code>POST /api/key</code> - Set API key</li>
             <li><code>GET /api/key/status</code> - Check API key status</li>
             <li><code>GET /api/health</code> - Health check</li>
@@ -278,6 +282,118 @@ async def get_api_key_status():
         success=False,
         message="API key not configured"
     )
+
+
+@app.post("/api/speech-to-text", response_model=SpeechToTextResponse)
+async def speech_to_text(
+    audio: UploadFile = File(..., description="Audio file to transcribe (WebM, WAV, MP3, etc.)"),
+):
+    """
+    Convert speech to text using Google Gemini 2.0 Flash Lite via OpenRouter.ai.
+    
+    Accepts audio files in various formats (WebM, WAV, MP3, OGG) and returns
+    the transcribed text ready to use as a prompt for image generation.
+    
+    **Supported formats:**
+    - WebM (typical for browser recordings)
+    - WAV
+    - MP3
+    - OGG
+    
+    **Returns:**
+    - **success**: Whether transcription succeeded
+    - **text**: Transcribed text (if successful)
+    - **error**: Error message (if failed)
+    
+    **Example usage:**
+    1. Record audio from microphone in browser (WebM format)
+    2. Send POST request with audio file
+    3. Receive transcribed text
+    4. Use text as prompt for image generation
+    """
+    # Validate file
+    if not audio.filename:
+        return SpeechToTextResponse(
+            success=False,
+            error="No audio file provided"
+        )
+    
+    # Read audio bytes
+    try:
+        audio_bytes = await audio.read()
+        if not audio_bytes or len(audio_bytes) == 0:
+            return SpeechToTextResponse(
+                success=False,
+                error="Audio file is empty"
+            )
+    except Exception as e:
+        return SpeechToTextResponse(
+            success=False,
+            error=f"Failed to read audio file: {str(e)}"
+        )
+    
+    # Determine MIME type from content type or filename
+    mime_type = audio.content_type
+    if not mime_type or not mime_type.startswith("audio/"):
+        # Try to infer from filename
+        filename_lower = audio.filename.lower()
+        if filename_lower.endswith(".webm"):
+            mime_type = "audio/webm"
+        elif filename_lower.endswith(".wav"):
+            mime_type = "audio/wav"
+        elif filename_lower.endswith(".mp3"):
+            mime_type = "audio/mpeg"
+        elif filename_lower.endswith(".ogg"):
+            mime_type = "audio/ogg"
+        else:
+            # Default to webm (most common for browser recordings)
+            mime_type = "audio/webm"
+    
+    # Validate MIME type
+    valid_mime_types = [
+        "audio/webm",
+        "audio/wav",
+        "audio/wave",
+        "audio/mpeg",
+        "audio/mp3",
+        "audio/ogg",
+        "audio/opus",
+    ]
+    if mime_type not in valid_mime_types:
+        return SpeechToTextResponse(
+            success=False,
+            error=f"Unsupported audio format: {mime_type}. Supported formats: {', '.join(valid_mime_types)}"
+        )
+    
+    # Transcribe audio
+    try:
+        transcribed_text = await transcribe_audio(audio_bytes, mime_type)
+        return SpeechToTextResponse(
+            success=True,
+            text=transcribed_text,
+        )
+    except ValueError as e:
+        # API key not configured
+        return SpeechToTextResponse(
+            success=False,
+            error=str(e),
+        )
+    except httpx.HTTPError as e:
+        # API request failed
+        error_msg = str(e)
+        if "401" in error_msg or "Unauthorized" in error_msg:
+            error_msg = "Invalid or missing OpenRouter API key. Set OPENROUTER_API_KEY environment variable."
+        elif "429" in error_msg:
+            error_msg = "Rate limit exceeded. Please try again later."
+        return SpeechToTextResponse(
+            success=False,
+            error=f"Transcription failed: {error_msg}",
+        )
+    except Exception as e:
+        return SpeechToTextResponse(
+            success=False,
+            error=f"Unexpected error: {str(e)}",
+        )
 
 
 # ===== Image Serving =====
