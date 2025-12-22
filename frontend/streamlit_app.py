@@ -94,6 +94,23 @@ def image_to_base64(image_bytes: bytes) -> str:
     return base64.b64encode(image_bytes).decode()
 
 
+def speech_to_text(audio_bytes: bytes, filename: str = "audio.webm") -> dict:
+    """Convert speech to text using the API."""
+    url = get_api_url()
+    files = {
+        "audio": (filename, audio_bytes, "audio/webm"),
+    }
+    try:
+        response = requests.post(
+            f"{url}/speech-to-text",
+            files=files,
+            timeout=60
+        )
+        return response.json()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
 # Page config
 st.set_page_config(
     page_title="Image Generation Game",
@@ -229,17 +246,65 @@ with col2:
     else:
         st.info("Generate an image to see it here!")
 
+# Speech-to-Text section (separate, just for transcription)
+st.divider()
+st.header("🎤 Speech-to-Text")
+
+# Audio recording section
+st.markdown("**Nagraj audio, aby otrzymać transkrypcję tekstową:**")
+audio_data = st.audio_input("Kliknij mikrofon, aby nagrać", label_visibility="visible")
+
+# Show audio player if recorded
+if audio_data:
+    st.audio(audio_data, format="audio/webm")
+    
+    # Transcribe button
+    transcribe_btn = st.button("📝 Transkrybuj audio", type="primary", use_container_width=True)
+    
+    # Handle transcription
+    if transcribe_btn:
+        with st.spinner("🎤 Transkrypcja audio... (może potrwać kilka sekund)"):
+            audio_bytes = audio_data.read()
+            result = speech_to_text(audio_bytes, "recording.webm")
+            
+            if result.get("success"):
+                transcribed_text = result.get("text", "").strip()
+                if transcribed_text:
+                    # Save transcription to session state
+                    st.session_state.transcribed_text = transcribed_text
+                    st.success("✅ Audio zostało przetranskrybowane!")
+                else:
+                    st.warning("⚠️ Transkrypcja zwróciła pusty tekst")
+            else:
+                error_msg = result.get("error", "Unknown error")
+                st.error(f"❌ Błąd transkrypcji: {error_msg}")
+
+# Display transcription as text
+if "transcribed_text" in st.session_state and st.session_state.transcribed_text:
+    st.divider()
+    st.markdown("### 📝 Transkrypcja:")
+    st.markdown(f"""
+    <div style="background-color: #2d2d44; padding: 20px; border-radius: 10px; border-left: 4px solid #a855f7;">
+        <p style="font-size: 16px; line-height: 1.6; color: #eee; margin: 0;">
+            {st.session_state.transcribed_text}
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.caption("💡 Możesz skopiować ten tekst i wkleić go do pola prompt poniżej")
+
 # Prompt input section
 st.divider()
 st.header("✏️ Enter Your Prompt")
 
+# Simple text area for prompt
 prompt_col1, prompt_col2 = st.columns([4, 1])
 
 with prompt_col1:
     prompt = st.text_area(
         "Describe the image you want to generate:",
         placeholder="A cute cartoon dog with blue eyes...",
-        height=100
+        height=100,
+        label_visibility="visible"
     )
 
 with prompt_col2:
@@ -248,6 +313,10 @@ with prompt_col2:
     generate_btn = st.button("🚀 Generate", type="primary", use_container_width=True)
 
 if generate_btn and prompt:
+    # Clear prompt_from_audio after using it for generation
+    if "prompt_from_audio" in st.session_state:
+        del st.session_state.prompt_from_audio
+    
     with st.spinner("🎨 Generating image... (this may take 30-60 seconds)"):
         result = generate_image(prompt)
         
