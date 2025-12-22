@@ -8,6 +8,7 @@ services:
       - "8000:8000"
     environment:
       - KIE_API_KEY=${KIE_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - HOST=0.0.0.0
       - PORT=8000
       - IMAGES_DIR=/app/images
