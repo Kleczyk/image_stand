@@ -28,6 +28,7 @@ docker-compose*
 
 # Misc
 *.log
-.env*
+# Note: .env is NOT ignored so it can be used by docker-compose
+# env.example is ignored as it's just a template
 env.example
 

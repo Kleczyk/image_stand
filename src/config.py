@@ -3,7 +3,8 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from .env file (if it exists)
+# In Docker, environment variables are set by docker-compose, so this is optional
 load_dotenv()
 
 # Base directory
@@ -18,9 +19,14 @@ class Settings:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._kie_api_key = os.getenv("KIE_API_KEY", "")
-            cls._instance._openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "")
+            # Reload environment variables to ensure they're current
+            cls._instance._reload_from_env()
         return cls._instance
+    
+    def _reload_from_env(self):
+        """Reload API keys from environment variables."""
+        self._kie_api_key = os.getenv("KIE_API_KEY", "")
+        self._openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "")
     
     @property
     def kie_api_key(self) -> str:
