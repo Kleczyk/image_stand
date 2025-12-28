@@ -9,7 +9,7 @@ Image generation game and API using [kie.ai Nano Banana Pro](https://kie.ai/nano
 - 🎨 **Text-to-Image**: Generate images from text prompts
 - 🎤 **Speech-to-Text**: Record audio and convert to text using Google Gemini 2.0 Flash Lite via OpenRouter.ai
 - ✨ **Image Editing**: Edit generated images with additional prompts
-- 📊 **Image Comparison**: Compare images using SSIM algorithm (similarity score)
+- 📊 **Image Comparison**: Compare images using SSIM, CLIP embeddings, or hybrid method with non-linear scaling
 - 🎮 **Game Mode**: Try to recreate a reference image and improve your score
 - 💾 **Local Storage**: Images saved locally in Docker volume
 - 🔄 **LangGraph Workflows**: Stateful graph-based processing
@@ -124,11 +124,105 @@ curl -X POST http://localhost:8000/api/speech-to-text \
 | GET | `/api/health` | Health check and status |
 | POST | `/api/generate` | Generate or edit image |
 | POST | `/api/speech-to-text` | Convert audio to text (WebM, WAV, MP3, OGG) |
-| POST | `/api/compare` | Compare two images (SSIM algorithm) |
+| POST | `/api/compare` | Compare two images (SSIM, embeddings, or hybrid method) |
 | POST | `/api/key` | Set API key at runtime |
 | GET | `/api/key/status` | Check API key status |
+| POST | `/api/sensitivity` | Set similarity rigour/strictness (0.1-10.0) |
+| GET | `/api/sensitivity` | Get current similarity rigour value |
 | GET | `/api/images` | List all saved images |
 | GET | `/images/{filename}` | Get saved image file |
+
+### Image Comparison Endpoint
+
+**POST `/api/compare`** - Compare two images for similarity
+
+**Parameters:**
+- `image1` (file, required): First image file
+- `image2` (file, required): Second image file
+- `method` (string, optional): Comparison method - `ssim`, `embeddings`, or `hybrid` (default: from config)
+- `sensitivity` (float, optional): Rigour/strictness level (0.1-10.0, default: 1.0)
+  - Higher values (2.0-5.0) = more strict = lower scores
+  - Lower values (0.5-0.8) = more lenient = higher scores
+
+**Response:**
+```json
+{
+  "success": true,
+  "similarity_score": 0.75,
+  "similarity_percentage": 87.5,
+  "method": "hybrid",
+  "error": null
+}
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:8000/api/compare \
+  -F "image1=@image1.png" \
+  -F "image2=@image2.png" \
+  -F "method=hybrid" \
+  -F "sensitivity=3.0"
+```
+
+## 🎯 Similarity Thresholds and Configuration
+
+The image comparison system uses **non-linear scaling** to better discriminate between different and similar images:
+
+- **Completely different images** (e.g., can vs man): **5-10% similarity** (max 10%)
+- **Somewhat similar images**: **20-50% similarity**
+- **Similar images**: **60-90% similarity** (minimum 60%)
+- **Very similar images**: **85-95% similarity**
+
+### How It Works
+
+The system uses piecewise linear scaling:
+- Scores below `SIMILARITY_MIN_THRESHOLD` (default 0.3) → compressed to max 10%
+- Scores above `SIMILARITY_MAX_THRESHOLD` (default 0.7) → expanded to 60%+
+- Scores in between → gradual transition from 10% to 60%
+
+### Configuration
+
+Set these in your `.env` file:
+
+```env
+# Similarity algorithm
+SIMILARITY_MODEL=hybrid  # Options: ssim, embeddings, hybrid
+
+# Non-linear scaling (enabled by default)
+SIMILARITY_USE_NONLINEAR=true  # Enable non-linear scaling
+SIMILARITY_MIN_THRESHOLD=0.3   # Below this = different images (max 10%)
+SIMILARITY_MAX_THRESHOLD=0.7   # Above this = similar images (60%+)
+
+# Rigour/strictness
+SIMILARITY_SENSITIVITY=1.0  # Higher = more strict (2.0-5.0), lower = more lenient (0.5-0.8)
+
+# Hybrid method weights
+SIMILARITY_EMBEDDING_WEIGHT=0.7  # Weight for CLIP embeddings (0.0-1.0)
+SIMILARITY_SSIM_WEIGHT=0.3        # Weight for SSIM (0.0-1.0)
+```
+
+### Adjusting Similarity Rigour
+
+**Via API:**
+```bash
+# Set strict mode (lower scores)
+curl -X POST http://localhost:8000/api/sensitivity \
+  -H "Content-Type: application/json" \
+  -d '{"sensitivity": 3.0}'
+
+# Check current value
+curl http://localhost:8000/api/sensitivity
+```
+
+**Via Frontend:**
+- Use the slider in the sidebar (0.1-10.0)
+- Quick presets: "Lenient (0.5)", "Normal (1.0)", "Strict (3.0)"
+
+**Sensitivity Values:**
+- `0.5-0.8`: More lenient (higher scores)
+- `1.0`: Normal (no adjustment)
+- `2.0-3.0`: Strict (lower scores, good for strict comparison)
+- `4.0-5.0`: Very strict (dramatically lower scores)
 
 ## 🛠️ Useful Commands
 
@@ -229,7 +323,7 @@ This script tests:
 - **Image API**: kie.ai Nano Banana Pro
 - **Speech-to-Text**: Google Gemini 2.0 Flash Lite via OpenRouter.ai
 - **Container**: Docker + uv
-- **Image Comparison**: SSIM algorithm
+- **Image Comparison**: SSIM, CLIP embeddings, or hybrid method with non-linear scaling
 
 ## 📁 Project Structure
 
@@ -244,7 +338,8 @@ image_stand/
 │   ├── services/
 │   │   ├── kie_client.py       # kie.ai API client
 │   │   ├── openrouter_client.py # OpenRouter.ai client (speech-to-text)
-│   │   ├── comparison.py       # SSIM comparison algorithm
+│   │   ├── comparison.py       # Image comparison (SSIM, embeddings, hybrid)
+│   │   ├── image_embeddings.py # CLIP embeddings extraction
 │   │   └── image_storage.py    # Local image storage
 │   ├── config.py               # Application settings
 │   └── main.py                 # FastAPI application

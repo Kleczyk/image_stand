@@ -164,6 +164,38 @@ docker compose up --build -d
 - **API Examples**: [API_EXAMPLES.md](API_EXAMPLES.md)
 - **Test API Connections**: `./test_api_connections.sh`
 
+## 🎯 Image Similarity Configuration
+
+The system uses **non-linear scaling** to better distinguish between different and similar images:
+
+- **Different images** (e.g., can vs man): **5-10% similarity**
+- **Similar images**: **60-90% similarity**
+
+### Adjust Similarity Rigour
+
+**In the Frontend:**
+- Use the "Similarity Rigour" slider in the sidebar
+- Higher values = more strict (lower scores)
+- Lower values = more lenient (higher scores)
+
+**Via API:**
+```bash
+# Set strict mode
+curl -X POST http://localhost:8000/api/sensitivity \
+  -H "Content-Type: application/json" \
+  -d '{"sensitivity": 3.0}'
+```
+
+**In `.env` file:**
+```env
+SIMILARITY_SENSITIVITY=3.0  # Higher = more strict
+SIMILARITY_USE_NONLINEAR=true
+SIMILARITY_MIN_THRESHOLD=0.3  # Below this = different (max 10%)
+SIMILARITY_MAX_THRESHOLD=0.7  # Above this = similar (60%+)
+```
+
+See [README.md](README.md#-similarity-thresholds-and-configuration) for detailed configuration options.
+
 ## ✅ That's It!
 
 You're ready to generate images with text or voice! 🚀
