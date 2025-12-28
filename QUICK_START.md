@@ -1,121 +1,150 @@
 # ⚡ Quick Start - Image Stand
 
-## In 5 minutes
+Get up and running in **5 minutes**!
 
-### 1. Requirements
+## Prerequisites
 
-- Docker and Docker Compose installed
-- Two API keys:
+- **Docker** and **Docker Compose** installed
+  - [Install Docker](DOCKER_INSTALLATION.md) if needed
+- Two API keys (get them now):
   - [kie.ai API Key](https://kie.ai) - for image generation
   - [OpenRouter.ai API Key](https://openrouter.ai) - for speech-to-text
 
-### 2. Configuration
+## Step 1: Get API Keys (2 minutes)
+
+### kie.ai API Key
+1. Go to [kie.ai](https://kie.ai)
+2. Sign up or log in
+3. Get your API key from the dashboard
+
+### OpenRouter.ai API Key
+1. Go to [OpenRouter.ai](https://openrouter.ai)
+2. Sign up or log in
+3. Go to [API Keys](https://openrouter.ai/keys)
+4. Create a new API key
+5. Copy the key (starts with `sk-or-v1-...`)
+
+## Step 2: Configure Environment (1 minute)
 
 ```bash
-# Copy configuration file
+# Copy the example environment file
 cp env.example .env
 
-# Edit and add API keys
+# Edit .env file with your API keys
 nano .env
 ```
 
-Fill in `.env`:
+**Add your keys:**
 ```env
-KIE_API_KEY=sk-your-kie-api-key
-OPENROUTER_API_KEY=sk-or-your-openrouter-api-key
+KIE_API_KEY=sk-your-kie-api-key-here
+OPENROUTER_API_KEY=sk-or-your-openrouter-api-key-here
 ```
 
-### 3. Run
+**Save and exit** (Ctrl+X, then Y, then Enter in nano)
+
+## Step 3: Start Application (1 minute)
+
+```bash
+# Build and start all services
+docker compose up --build -d
+
+# Wait a few seconds, then check status
+docker compose ps
+```
+
+You should see both `image-stand-api` and `image-stand-frontend` containers running.
+
+## Step 4: Access Application (30 seconds)
+
+Open in your browser:
+
+- **Frontend**: http://localhost:8501
+- **API Docs**: http://localhost:8000/docs
+- **API Health**: http://localhost:8000/api/health
+
+## Step 5: Test It Works (30 seconds)
+
+```bash
+# Test API health
+curl http://localhost:8000/api/health
+```
+
+**Expected response:**
+```json
+{
+  "status": "ok",
+  "api_key_configured": true,
+  "langgraph_enabled": true
+}
+```
+
+✅ **If you see this, everything is working!**
+
+## 🎮 Using the Application
+
+### Generate Image with Text
+
+1. Open http://localhost:8501
+2. Enter your prompt: "A cute cartoon dog with blue eyes"
+3. Click "🚀 Generate"
+4. Wait ~30 seconds for the image to generate
+5. View your image!
+
+### Generate Image with Voice
+
+1. Open http://localhost:8501
+2. Scroll to "🎤 Speech-to-Text" section
+3. Click the microphone button
+4. Record your prompt (e.g., "A beautiful sunset over mountains")
+5. Click "📝 Transcribe Audio"
+6. Copy the transcribed text
+7. Paste it into "✏️ Enter Your Prompt" field
+8. Click "🚀 Generate"
+
+## 🛠️ Common Commands
 
 ```bash
 # Start application
+docker compose up -d
+
+# Stop application
+docker compose down
+
+# Restart application
+docker compose restart
+
+# View logs
+docker compose logs -f
+
+# Rebuild after changes
 docker compose up --build -d
 
 # Check status
 docker compose ps
 ```
 
-### 4. Access
+## 🔧 Quick Troubleshooting
 
-- **Frontend**: http://localhost:8501
-- **API Docs**: http://localhost:8000/docs
-- **API**: http://localhost:8000
-
-### 5. Test
+### API key not working?
 
 ```bash
-# Test health check
-curl http://localhost:8000/api/health
+# Check .env file
+cat .env
 
-# Should return:
-# {"status":"ok","api_key_configured":true,"langgraph_enabled":true}
-```
+# Verify in container
+docker compose exec api env | grep API_KEY
 
-## Usage - Speech-to-Text
-
-### Via web interface
-
-1. Open http://localhost:8501
-2. Go to "🎤 Speech-to-Text" section
-3. Click microphone and record audio
-4. Click "📝 Transcribe Audio"
-5. Copy transcription and paste into prompt field
-6. Click "🚀 Generate"
-
-### Via API
-
-```bash
-# Transcribe audio
-curl -X POST http://localhost:8000/api/speech-to-text \
-  -F "audio=@recording.webm"
-
-# Use transcription to generate image
-curl -X POST http://localhost:8000/api/generate \
-  -F "prompt=Your transcription here" \
-  -F "resolution=1K"
-```
-
-## Useful commands
-
-```bash
-# Restart application
-docker compose restart
-
-# Stop
-docker compose down
-
-# Logs
-docker compose logs -f
-
-# Restart only API
+# Restart API
 docker compose restart api
-
-# Restart only frontend
-docker compose restart frontend
 ```
-
-## Troubleshooting
 
 ### Ports in use?
 
-Change in `docker-compose.yml`:
+Change ports in `docker-compose.yml`:
 ```yaml
 ports:
-  - "8001:8000"  # Instead of 8000
-  - "8502:8501"  # Instead of 8501
-```
-
-### API key error?
-
-```bash
-# Check .env
-cat .env
-
-# Check in container
-docker compose exec api env | grep API_KEY
-
-# Restart
-docker compose restart api
+  - "8001:8000"  # API on 8001
+  - "8502:8501"  # Frontend on 8502
 ```
 
 ### Containers not starting?
@@ -124,32 +153,19 @@ docker compose restart api
 # Check logs
 docker compose logs
 
-# Check status
-docker compose ps -a
+# Rebuild
+docker compose down
+docker compose up --build -d
 ```
 
-## Documentation
+## 📚 Next Steps
 
-- **Installation**: [INSTALLATION.md](INSTALLATION.md)
+- **Detailed Installation**: [INSTALLATION.md](INSTALLATION.md)
 - **API Examples**: [API_EXAMPLES.md](API_EXAMPLES.md)
-- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
-- **Docker**: [DOCKER_INSTALLATION.md](DOCKER_INSTALLATION.md)
+- **Test API Connections**: `./test_api_connections.sh`
 
-## Quick endpoint Tests
+## ✅ That's It!
 
-```bash
-# 1. Health check
-curl http://localhost:8000/api/health
+You're ready to generate images with text or voice! 🚀
 
-# 2. Speech-to-text (requires audio file)
-curl -X POST http://localhost:8000/api/speech-to-text \
-  -F "audio=@recording.webm"
-
-# 3. Generate image
-curl -X POST http://localhost:8000/api/generate \
-  -F "prompt=Test image" \
-  -F "resolution=1K"
-```
-
-Gotowe! 🚀
-
+Need help? Check the [full documentation](README.md) or [troubleshooting guide](INSTALLATION.md#troubleshooting).
