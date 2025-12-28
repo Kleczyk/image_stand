@@ -38,7 +38,7 @@ cp env.example .env
 nano .env
 ```
 
-Wypełnij:
+Fill in:
 ```env
 KIE_API_KEY=sk-your-kie-api-key-here
 OPENROUTER_API_KEY=sk-or-your-openrouter-api-key-here
@@ -65,8 +65,8 @@ docker compose logs -f
 | **API Docs (Swagger)** | http://localhost:8000/docs |
 | **API Health** | http://localhost:8000/api/health |
 
-**Szczegółowe instrukcje**: Zobacz [INSTALLATION.md](INSTALLATION.md)  
-**Przykłady API**: Zobacz [API_EXAMPLES.md](API_EXAMPLES.md)
+**Szczegółowe instrukcje**: See [INSTALLATION.md](INSTALLATION.md)  
+**Przykłady API**: See [API_EXAMPLES.md](API_EXAMPLES.md)
 
 ### 3. Access
 
@@ -139,12 +139,12 @@ curl -X POST http://localhost:8000/api/speech-to-text \
 # Response:
 # {
 #   "success": true,
-#   "text": "Transkrypcja tekstowa...",
+#   "text": "Transcribed text...",
 #   "error": null
 # }
 ```
 
-**Więcej przykładów**: Zobacz [API_EXAMPLES.md](API_EXAMPLES.md)
+**More przykładów**: See [API_EXAMPLES.md](API_EXAMPLES.md)
 
 ## Project Structure
 

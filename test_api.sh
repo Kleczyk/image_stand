@@ -64,8 +64,8 @@ if [ -n "$LOCAL_URL" ] && [ "$LOCAL_URL" != "null" ] && [ "$LOCAL_URL" != "None"
     if [ "$HTTP_CODE" = "200" ]; then
         echo "✅ Image accessible (HTTP $HTTP_CODE)"
         # Save a copy
-        curl -s -o "test_local_copy.png" "http://localhost:8000$LOCAL_URL"
-        echo "✅ Saved copy as: test_local_copy.png"
+        curl -s -o "Test_local_copy.png" "http://localhost:8000$LOCAL_URL"
+        echo "✅ Saved copy as: Test_local_copy.png"
     else
         echo "❌ Image not accessible (HTTP $HTTP_CODE)"
     fi

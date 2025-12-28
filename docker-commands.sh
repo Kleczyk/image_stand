@@ -1,9 +1,9 @@
 #!/bin/bash
-# 🐳 Szybkie polecenia Docker Compose dla Image Stand
+# 🐳 Quick Docker Compose commands for Image Stand
 
 set -e
 
-# Kolory dla outputu
+# Colors for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
@@ -11,36 +11,36 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}🐳 Image Stand - Docker Compose Commands${NC}\n"
 
-# Funkcja pomocnicza
+# Helper function
 show_help() {
-    echo "Użycie: ./docker-commands.sh [komenda]"
+    echo "Usage: ./docker-commands.sh [command]"
     echo ""
-    echo "Dostępne komendy:"
-    echo "  start       - Uruchom aplikację (build + up)"
-    echo "  stop        - Zatrzymaj aplikację"
-    echo "  restart     - Restart aplikacji"
-    echo "  logs        - Pokaż logi (wszystkie serwisy)"
-    echo "  logs-api    - Pokaż logi API"
-    echo "  logs-frontend - Pokaż logi frontendu"
-    echo "  status      - Status kontenerów"
-    echo "  rebuild     - Przebuduj i uruchom"
-    echo "  clean       - Zatrzymaj i usuń wszystko"
-    echo "  test        - Test API health check"
-    echo "  shell-api   - Otwórz shell w kontenerze API"
-    echo "  shell-frontend - Otwórz shell w kontenerze frontendu"
+    echo "Available commands:"
+    echo "  start       - Start application (build + up)"
+    echo "  stop        - Stop application"
+    echo "  restart     - Restart application"
+    echo "  logs        - Show logs (all services)"
+    echo "  logs-api    - Show API logs"
+    echo "  logs-frontend - Show frontend logs"
+    echo "  status      - Container status"
+    echo "  rebuild     - Rebuild and start"
+    echo "  clean       - Stop and remove everything"
+    echo "  Test        - Test API health check"
+    echo "  shell-api   - Open shell in API container"
+    echo "  shell-frontend - Open shell in frontend container"
     echo ""
 }
 
-# Sprawdź czy .env istnieje
+# Check if .env exists
 check_env() {
     if [ ! -f .env ]; then
-        echo -e "${YELLOW}⚠️  Plik .env nie istnieje!${NC}"
-        echo "Tworzenie z env.example..."
+        echo -e "${YELLOW}⚠️  .env file does not exist!${NC}"
+        echo "Creating from env.example..."
         if [ -f env.example ]; then
             cp env.example .env
-            echo -e "${YELLOW}✏️  Edytuj .env i dodaj swoje klucze API!${NC}"
+            echo -e "${YELLOW}✏️  Edit .env and add your API keys!${NC}"
         else
-            echo -e "${RED}❌ env.example nie istnieje!${NC}"
+            echo -e "${RED}❌ env.example does not exist!${NC}"
             exit 1
         fi
     fi
@@ -50,9 +50,9 @@ check_env() {
 case "${1:-help}" in
     start)
         check_env
-        echo -e "${GREEN}🚀 Uruchamianie aplikacji...${NC}"
+        echo -e "${GREEN}🚀 Starting application...${NC}"
         docker compose up --build -d
-        echo -e "${GREEN}✅ Aplikacja uruchomiona!${NC}"
+        echo -e "${GREEN}✅ Application started!${NC}"
         echo ""
         echo "Frontend: http://localhost:8501"
         echo "API Docs: http://localhost:8000/docs"
@@ -60,79 +60,79 @@ case "${1:-help}" in
         ;;
     
     stop)
-        echo -e "${YELLOW}🛑 Zatrzymywanie aplikacji...${NC}"
+        echo -e "${YELLOW}🛑 Stopping application...${NC}"
         docker compose down
-        echo -e "${GREEN}✅ Aplikacja zatrzymana${NC}"
+        echo -e "${GREEN}✅ Application stopped${NC}"
         ;;
     
     restart)
-        echo -e "${YELLOW}🔄 Restart aplikacji...${NC}"
+        echo -e "${YELLOW}🔄 Restarting application...${NC}"
         docker compose restart
-        echo -e "${GREEN}✅ Aplikacja zrestartowana${NC}"
+        echo -e "${GREEN}✅ Application restarted${NC}"
         ;;
     
     logs)
-        echo -e "${GREEN}📋 Logi wszystkich serwisów:${NC}"
+        echo -e "${GREEN}📋 Logs from all services:${NC}"
         docker compose logs -f
         ;;
     
     logs-api)
-        echo -e "${GREEN}📋 Logi API:${NC}"
+        echo -e "${GREEN}📋 API logs:${NC}"
         docker compose logs -f api
         ;;
     
     logs-frontend)
-        echo -e "${GREEN}📋 Logi Frontendu:${NC}"
+        echo -e "${GREEN}📋 Frontend logs:${NC}"
         docker compose logs -f frontend
         ;;
     
     status)
-        echo -e "${GREEN}📊 Status kontenerów:${NC}"
+        echo -e "${GREEN}📊 Container status:${NC}"
         docker compose ps
         echo ""
-        echo -e "${GREEN}💾 Użycie zasobów:${NC}"
+        echo -e "${GREEN}💾 Resource usage:${NC}"
         docker stats --no-stream
         ;;
     
     rebuild)
         check_env
-        echo -e "${YELLOW}🔨 Przebudowywanie aplikacji...${NC}"
+        echo -e "${YELLOW}🔨 Rebuilding application...${NC}"
         docker compose down
         docker compose build --no-cache
         docker compose up -d
-        echo -e "${GREEN}✅ Aplikacja przebudowana i uruchomiona${NC}"
+        echo -e "${GREEN}✅ Application rebuilt and started${NC}"
         ;;
     
     clean)
-        echo -e "${RED}🧹 Czyszczenie (zatrzymaj i usuń wszystko)...${NC}"
-        read -p "Czy na pewno? (y/N): " -n 1 -r
+        echo -e "${RED}🧹 Cleaning (stop and remove everything)...${NC}"
+        read -p "Are you sure? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             docker compose down -v
-            echo -e "${GREEN}✅ Wyczyszczone${NC}"
+            echo -e "${GREEN}✅ Cleaned${NC}"
         else
-            echo "Anulowano"
+            echo "Cancelled"
         fi
         ;;
     
-    test)
-        echo -e "${GREEN}🧪 Test API health check...${NC}"
+    Test)
+        echo -e "${GREEN}🧪 Testing API health check...${NC}"
         if curl -s http://localhost:8000/api/health > /dev/null; then
-            echo -e "${GREEN}✅ API działa!${NC}"
+            echo -e "${GREEN}✅ API is working!${NC}"
             curl -s http://localhost:8000/api/health | python3 -m json.tool 2>/dev/null || curl -s http://localhost:8000/api/health
         else
-            echo -e "${RED}❌ API nie odpowiada${NC}"
-            echo "Sprawdź czy aplikacja jest uruchomiona: ./docker-commands.sh status"
+            echo -e "${RED}❌ API is not responding${NC}"
+            echo "Check if application is running: ./docker-commands.sh status"
         fi
         ;;
     
     shell-api)
-        echo -e "${GREEN}🐚 Otwieranie shell w kontenerze API...${NC}"
+        echo -e "${GREEN}🐚 Opening shell in API container...${NC}"
         docker compose exec api /bin/bash || docker compose exec api /bin/sh
         ;;
     
     shell-frontend)
-        echo -e "${GREEN}🐚 Otwieranie shell w kontenerze frontendu...${NC}"
+        echo -e "${GREEN}🐚 Opening shell in frontend container...${NC}"
         docker compose exec frontend /bin/bash || docker compose exec frontend /bin/sh
         ;;
     

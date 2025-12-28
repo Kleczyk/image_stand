@@ -19,7 +19,7 @@ curl http://localhost:8000/api/health
 
 ### 2. Speech-to-Text (Nowy!)
 
-**Nagraj audio i wyślij do transkrypcji:**
+**Record audio and send for transcription:**
 
 ```bash
 curl -X POST http://localhost:8000/api/speech-to-text \
@@ -30,7 +30,7 @@ curl -X POST http://localhost:8000/api/speech-to-text \
 ```json
 {
   "success": true,
-  "text": "To jest transkrypcja nagranego audio.",
+  "text": "This is the transcription of the recorded audio.",
   "error": null
 }
 ```
@@ -52,7 +52,7 @@ curl -X POST http://localhost:8000/api/speech-to-text \
 
 ### 3. Generowanie obrazu
 
-**Z tekstu:**
+**From text:**
 ```bash
 curl -X POST http://localhost:8000/api/generate \
   -F "prompt=A beautiful sunset over mountains" \
@@ -113,22 +113,22 @@ curl http://localhost:8000/api/key/status
 
 ## Kompletny przykład workflow
 
-### Krok 1: Transkrypcja mowy na tekst
+### Step 1: Speech-to-Text Transcription
 
 ```bash
-# Nagraj audio (w przeglądarce lub użyj istniejącego pliku)
+# Record audio (in browser or use existing file)
 curl -X POST http://localhost:8000/api/speech-to-text \
   -F "audio=@my_recording.webm" > transcription.json
 
-# Wyciągnij tekst
+# Extract text
 TRANSCRIPT=$(cat transcription.json | python3 -c "import sys,json; print(json.load(sys.stdin)['text'])")
-echo "Transkrypcja: $TRANSCRIPT"
+echo "Transcription: $TRANSCRIPT"
 ```
 
-### Krok 2: Generowanie obrazu z transkrypcji
+### Step 2: Generate Image from Transcription
 
 ```bash
-# Użyj transkrypcji jako prompt
+# Use transcription as prompt
 curl -X POST http://localhost:8000/api/generate \
   -F "prompt=$TRANSCRIPT" \
   -F "resolution=1K" \
@@ -138,11 +138,11 @@ curl -X POST http://localhost:8000/api/generate \
 ### Krok 3: Pobranie wygenerowanego obrazu
 
 ```bash
-# Z odpowiedzi wyciągnij local_url i pobierz obraz
+# Extract local_url from response and download image
 LOCAL_URL=$(curl -s -X POST http://localhost:8000/api/generate \
   -F "prompt=$TRANSCRIPT" | python3 -c "import sys,json; print(json.load(sys.stdin)['local_url'])")
 
-# Pobierz obraz
+# Pull obraz
 curl http://localhost:8000$LOCAL_URL -o generated_image.png
 ```
 
@@ -163,17 +163,17 @@ def transcribe_audio(audio_file_path):
     result = response.json()
     
     if result['success']:
-        print(f"Transkrypcja: {result['text']}")
+        print(f"Transcription: {result['text']}")
         return result['text']
     else:
-        print(f"Błąd: {result['error']}")
+        print(f"Error: {result['error']}")
         return None
 
-# Użycie
+# Usage
 transcription = transcribe_audio("recording.webm")
 ```
 
-### Generowanie obrazu z transkrypcji
+### Generate Image from Transcription
 
 ```python
 import requests
@@ -195,7 +195,7 @@ def generate_image_from_transcription(transcription):
         print(f"Obraz wygenerowany: {result['local_url']}")
         return result['local_url']
     else:
-        print(f"Błąd: {result['error']}")
+        print(f"Error: {result['error']}")
         return None
 
 # Kompletny workflow
@@ -225,22 +225,22 @@ async function transcribeAudio(audioFilePath) {
         );
         
         if (response.data.success) {
-            console.log('Transkrypcja:', response.data.text);
+            console.log('Transcription:', response.data.text);
             return response.data.text;
         } else {
-            console.error('Błąd:', response.data.error);
+            console.error('Error:', response.data.error);
             return null;
         }
     } catch (error) {
-        console.error('Błąd requestu:', error.message);
+        console.error('Error requestu:', error.message);
         return null;
     }
 }
 
-// Użycie
+// Usage
 transcribeAudio('recording.webm').then(transcription => {
     if (transcription) {
-        console.log('Gotowa transkrypcja:', transcription);
+        console.log('Ready transcription:', transcription);
     }
 });
 ```
@@ -257,7 +257,7 @@ curl http://localhost:8000/api/health | python3 -m json.tool
 ### Test speech-to-text z pustym plikiem
 
 ```bash
-# Powinno zwrócić błąd (oczekiwane)
+# Powinno zwrócić error (oczekiwane)
 curl -X POST http://localhost:8000/api/speech-to-text \
   -F "audio=@/dev/null" | python3 -m json.tool
 ```
@@ -265,36 +265,36 @@ curl -X POST http://localhost:8000/api/speech-to-text \
 ### Test z przykładowym audio
 
 ```bash
-# Jeśli masz plik audio
+# If masz plik audio
 curl -X POST http://localhost:8000/api/speech-to-text \
-  -F "audio=@test_audio.webm" | python3 -m json.tool
+  -F "audio=@Test_audio.webm" | python3 -m json.tool
 ```
 
 ## Troubleshooting
 
-### Błąd: "OpenRouter API key not configured"
+### Error: "OpenRouter API key not configured"
 
 **Rozwiązanie:**
-1. Sprawdź czy `OPENROUTER_API_KEY` jest ustawiony w `.env`
+1. Check if `OPENROUTER_API_KEY` is set in `.env`
 2. Restart kontenera: `docker compose restart api`
-3. Sprawdź w kontenerze: `docker compose exec api env | grep OPENROUTER`
+3. Check in container: `docker compose exec api env | grep OPENROUTER`
 
-### Błąd: "Audio file is empty"
-
-**Rozwiązanie:**
-- Upewnij się, że plik audio istnieje i nie jest pusty
-- Sprawdź format pliku (WebM, WAV, MP3, OGG)
-
-### Błąd: "Unsupported audio format"
+### Error: "Audio file is empty"
 
 **Rozwiązanie:**
-- Użyj obsługiwanego formatu: WebM, WAV, MP3, OGG
-- Sprawdź MIME type pliku
+- Ensure, że plik audio istnieje i is not pusty
+- Check file format (WebM, WAV, MP3, OGG)
 
-### Timeout przy transkrypcji
+### Error: "Unsupported audio format"
 
 **Rozwiązanie:**
-- Sprawdź połączenie z OpenRouter.ai
-- Sprawdź czy klucz API jest poprawny
-- Sprawdź logi: `docker compose logs api`
+- Use supported format: WebM, WAV, MP3, OGG
+- Check file MIME type
+
+### Timeout during transcription
+
+**Solution:**
+- Check connection to OpenRouter.ai
+- Check if API key is correct
+- Check logs: `docker compose logs api`
 

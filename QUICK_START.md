@@ -1,41 +1,41 @@
-# ⚡ Szybki Start - Image Stand
+# ⚡ Quick Start - Image Stand
 
-## W 5 minut
+## In 5 minutes
 
-### 1. Wymagania
+### 1. Requirements
 
-- Docker i Docker Compose zainstalowane
-- Dwa klucze API:
-  - [kie.ai API Key](https://kie.ai) - do generowania obrazów
-  - [OpenRouter.ai API Key](https://openrouter.ai) - do transkrypcji mowy
+- Docker and Docker Compose installed
+- Two API keys:
+  - [kie.ai API Key](https://kie.ai) - for image generation
+  - [OpenRouter.ai API Key](https://openrouter.ai) - for speech-to-text
 
-### 2. Konfiguracja
+### 2. Configuration
 
 ```bash
-# Skopiuj plik konfiguracyjny
+# Copy configuration file
 cp env.example .env
 
-# Edytuj i dodaj klucze API
+# Edit and add API keys
 nano .env
 ```
 
-Wypełnij w `.env`:
+Fill in `.env`:
 ```env
 KIE_API_KEY=sk-your-kie-api-key
 OPENROUTER_API_KEY=sk-or-your-openrouter-api-key
 ```
 
-### 3. Uruchomienie
+### 3. Run
 
 ```bash
-# Uruchom aplikację
+# Start application
 docker compose up --build -d
 
-# Sprawdź status
+# Check status
 docker compose ps
 ```
 
-### 4. Dostęp
+### 4. Access
 
 - **Frontend**: http://localhost:8501
 - **API Docs**: http://localhost:8000/docs
@@ -47,101 +47,101 @@ docker compose ps
 # Test health check
 curl http://localhost:8000/api/health
 
-# Powinno zwrócić:
+# Should return:
 # {"status":"ok","api_key_configured":true,"langgraph_enabled":true}
 ```
 
-## Użycie - Speech-to-Text
+## Usage - Speech-to-Text
 
-### Przez interfejs webowy
+### Via web interface
 
-1. Otwórz http://localhost:8501
-2. Przejdź do sekcji "🎤 Speech-to-Text"
-3. Kliknij mikrofon i nagraj audio
-4. Kliknij "📝 Transkrybuj audio"
-5. Skopiuj transkrypcję i wklej do pola prompt
-6. Kliknij "🚀 Generate"
+1. Open http://localhost:8501
+2. Go to "🎤 Speech-to-Text" section
+3. Click microphone and record audio
+4. Click "📝 Transcribe Audio"
+5. Copy transcription and paste into prompt field
+6. Click "🚀 Generate"
 
-### Przez API
+### Via API
 
 ```bash
-# Transkrypcja audio
+# Transcribe audio
 curl -X POST http://localhost:8000/api/speech-to-text \
   -F "audio=@recording.webm"
 
-# Użyj transkrypcji do generowania obrazu
+# Use transcription to generate image
 curl -X POST http://localhost:8000/api/generate \
-  -F "prompt=Twoja transkrypcja tutaj" \
+  -F "prompt=Your transcription here" \
   -F "resolution=1K"
 ```
 
-## Przydatne komendy
+## Useful commands
 
 ```bash
-# Restart aplikacji
+# Restart application
 docker compose restart
 
-# Zatrzymaj
+# Stop
 docker compose down
 
-# Logi
+# Logs
 docker compose logs -f
 
-# Restart tylko API
+# Restart only API
 docker compose restart api
 
-# Restart tylko frontendu
+# Restart only frontend
 docker compose restart frontend
 ```
 
-## Rozwiązywanie problemów
+## Troubleshooting
 
-### Porty zajęte?
+### Ports in use?
 
-Zmień w `docker-compose.yml`:
+Change in `docker-compose.yml`:
 ```yaml
 ports:
-  - "8001:8000"  # Zamiast 8000
-  - "8502:8501"  # Zamiast 8501
+  - "8001:8000"  # Instead of 8000
+  - "8502:8501"  # Instead of 8501
 ```
 
-### Błąd API key?
+### API key error?
 
 ```bash
-# Sprawdź .env
+# Check .env
 cat .env
 
-# Sprawdź w kontenerze
+# Check in container
 docker compose exec api env | grep API_KEY
 
 # Restart
 docker compose restart api
 ```
 
-### Kontenery nie startują?
+### Containers not starting?
 
 ```bash
-# Sprawdź logi
+# Check logs
 docker compose logs
 
-# Sprawdź status
+# Check status
 docker compose ps -a
 ```
 
-## Dokumentacja
+## Documentation
 
-- **Instalacja**: [INSTALLATION.md](INSTALLATION.md)
-- **Przykłady API**: [API_EXAMPLES.md](API_EXAMPLES.md)
+- **Installation**: [INSTALLATION.md](INSTALLATION.md)
+- **API Examples**: [API_EXAMPLES.md](API_EXAMPLES.md)
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 - **Docker**: [DOCKER_INSTALLATION.md](DOCKER_INSTALLATION.md)
 
-## Szybki test endpointów
+## Quick endpoint Tests
 
 ```bash
 # 1. Health check
 curl http://localhost:8000/api/health
 
-# 2. Speech-to-text (wymaga pliku audio)
+# 2. Speech-to-text (requires audio file)
 curl -X POST http://localhost:8000/api/speech-to-text \
   -F "audio=@recording.webm"
 

@@ -1,338 +1,338 @@
-# 🚀 Instrukcja uruchomienia Image Stand
+# 🚀 Image Stand Installation Instructions
 
-## Wymagania wstępne
+## Prerequisites
 
-- **Docker** (wersja 20.10 lub nowsza)
-- **Docker Compose** (wersja 2.0 lub nowsza)
-- **Klucze API**:
-  - `KIE_API_KEY` - klucz z [kie.ai](https://kie.ai) (do generowania obrazów)
-  - `OPENROUTER_API_KEY` - klucz z [OpenRouter.ai](https://openrouter.ai) (do transkrypcji mowy)
+- **Docker** (version 20.10 or newer)
+- **Docker Compose** (version 2.0 or newer)
+- **API Keys**:
+  - `KIE_API_KEY` - key from [kie.ai](https://kie.ai) (for image generation)
+  - `OPENROUTER_API_KEY` - key from [OpenRouter.ai](https://openrouter.ai) (for speech-to-text)
 
-## Krok 1: Przygotowanie kluczy API
+## Step 1: Prepare API Keys
 
-### 1.1. Uzyskaj klucz kie.ai API
+### 1.1. Get kie.ai API Key
 
-1. Zarejestruj się na [kie.ai](https://kie.ai)
-2. Przejdź do sekcji API Keys
-3. Skopiuj swój klucz API
+1. Register at [kie.ai](https://kie.ai)
+2. Go to API Keys section
+3. Copy your API key
 
-### 1.2. Uzyskaj klucz OpenRouter.ai API
+### 1.2. Get OpenRouter.ai API Key
 
-1. Zarejestruj się na [OpenRouter.ai](https://openrouter.ai)
-2. Przejdź do sekcji [API Keys](https://openrouter.ai/keys)
-3. Utwórz nowy klucz API
-4. Skopiuj klucz API
+1. Register at [OpenRouter.ai](https://openrouter.ai)
+2. Go to [API Keys](https://openrouter.ai/keys) section
+3. Create a new API key
+4. Copy the API key
 
-## Krok 2: Konfiguracja zmiennych środowiskowych
+## Step 2: Configure Environment Variables
 
-### Opcja A: Plik `.env` (zalecane)
+### Option A: `.env` file (recommended)
 
-1. Skopiuj plik przykładowy:
+1. Copy example file:
    ```bash
    cp env.example .env
    ```
 
-2. Edytuj plik `.env` i wstaw swoje klucze:
+2. Edit `.env` file and add your keys:
    ```bash
    nano .env
-   # lub
+   # or
    vim .env
    ```
 
-3. Wypełnij wartości:
+3. Fill in values:
    ```env
    KIE_API_KEY=sk-your-kie-api-key-here
    OPENROUTER_API_KEY=sk-or-your-openrouter-api-key-here
    ```
 
-### Opcja B: Eksport zmiennych środowiskowych
+### Option B: Export environment variables
 
 ```bash
 export KIE_API_KEY="sk-your-kie-api-key-here"
 export OPENROUTER_API_KEY="sk-or-your-openrouter-api-key-here"
 ```
 
-## Krok 3: Uruchomienie aplikacji
+## Step 3: Run Application
 
-### 3.1. Zbuduj i uruchom kontenery
+### 3.1. Build and start containers
 
 ```bash
-# Zbuduj obrazy i uruchom kontenery
+# Build images and start containers
 docker compose up --build
 ```
 
-### 3.2. Uruchom w tle (detached mode)
+### 3.2. Run in background (detached mode)
 
 ```bash
-# Uruchom w tle
+# Run in background
 docker compose up --build -d
 ```
 
-### 3.3. Sprawdź status kontenerów
+### 3.3. Check container status
 
 ```bash
-# Sprawdź czy kontenery działają
+# Check if containers are running
 docker compose ps
 ```
 
-Powinieneś zobaczyć:
+You should see:
 ```
 NAME                  STATUS              PORTS
 image-stand-api       Up                  0.0.0.0:8000->8000/tcp
 image-stand-frontend   Up                  0.0.0.0:8501->8501/tcp
 ```
 
-## Krok 4: Weryfikacja działania
+## Step 4: Verify Operation
 
-### 4.1. Sprawdź API
+### 4.1. Check API
 
-Otwórz w przeglądarce:
-- **API Dokumentacja (Swagger)**: http://localhost:8000/docs
+Open in browser:
+- **API Documentation (Swagger)**: http://localhost:8000/docs
 - **API Health Check**: http://localhost:8000/api/health
 - **API Home**: http://localhost:8000
 
-### 4.2. Sprawdź Frontend
+### 4.2. Check Frontend
 
-Otwórz w przeglądarce:
-- **Aplikacja Streamlit**: http://localhost:8501
+Open in browser:
+- **Streamlit Application**: http://localhost:8501
 
-### 4.3. Test API (opcjonalnie)
+### 4.3. Test API (optional)
 
 ```bash
 # Test health check
 curl http://localhost:8000/api/health
 
-# Test z kluczem API (jeśli ustawiony przez .env)
+# Test with API key (if set via .env)
 curl -X POST http://localhost:8000/api/key \
   -H "Content-Type: application/json" \
   -d '{"api_key": "your-kie-api-key"}'
 ```
 
-## Krok 5: Użycie aplikacji
+## Step 5: Using the Application
 
-### 5.1. Przez interfejs webowy (Streamlit)
+### 5.1. Via Web Interface (Streamlit)
 
-1. Otwórz http://localhost:8501
-2. W sidebarze:
-   - Wprowadź swój `KIE_API_KEY` i kliknij "Set API Key"
-   - (Opcjonalnie) Prześlij obraz referencyjny
-3. W sekcji "🎤 Record Audio (Speech-to-Text)":
-   - Kliknij przycisk mikrofonu
-   - Nagraj swój prompt
-   - Kliknij "📝 Transcribe"
-   - Transkrypcja automatycznie wypełni pole prompt
-4. Kliknij "🚀 Generate" aby wygenerować obraz
+1. Open http://localhost:8501
+2. In sidebar:
+   - Enter your `KIE_API_KEY` and click "Set API Key"
+   - (Optional) Upload reference image
+3. In "🎤 Speech-to-Text" section:
+   - Click microphone button
+   - Record your prompt
+   - Click "📝 Transcribe Audio"
+   - Copy transcription and paste into prompt field
+4. Click "🚀 Generate" to generate image
 
-### 5.2. Przez API
+### 5.2. Via API
 
 ```bash
-# Generuj obraz z tekstu
+# Generate image from text
 curl -X POST http://localhost:8000/api/generate \
   -F "prompt=A beautiful sunset over mountains" \
   -F "resolution=1K" \
   -F "aspect_ratio=16:9"
 
-# Transkrypcja mowy na tekst
+# Speech-to-text transcription
 curl -X POST http://localhost:8000/api/speech-to-text \
   -F "audio=@recording.webm"
 ```
 
-## Przydatne polecenia Docker Compose
+## Useful Docker Compose Commands
 
-### Zatrzymanie aplikacji
+### Stopping Application
 
 ```bash
-# Zatrzymaj kontenery
+# Stop containers
 docker compose down
 
-# Zatrzymaj i usuń wolumeny
+# Stop and remove volumes
 docker compose down -v
 ```
 
-### Logi
+### Logs
 
 ```bash
-# Zobacz logi wszystkich serwisów
+# View logs from all services
 docker compose logs
 
-# Zobacz logi tylko API
+# View logs from API only
 docker compose logs api
 
-# Zobacz logi tylko frontendu
+# View logs from frontend only
 docker compose logs frontend
 
-# Śledź logi na żywo
+# Follow logs in real-time
 docker compose logs -f
 ```
 
 ### Restart
 
 ```bash
-# Restart wszystkich serwisów
+# Restart all services
 docker compose restart
 
-# Restart tylko API
+# Restart API only
 docker compose restart api
 
-# Restart tylko frontendu
+# Restart frontend only
 docker compose restart frontend
 ```
 
 ### Rebuild
 
 ```bash
-# Przebuduj obrazy (po zmianach w kodzie)
+# Rebuild images (after code changes)
 docker compose up --build
 
-# Przebuduj bez cache
+# Rebuild without cache
 docker compose build --no-cache
 docker compose up
 ```
 
-### Sprawdzenie statusu
+### Check Status
 
 ```bash
-# Status kontenerów
+# Container status
 docker compose ps
 
-# Użycie zasobów
+# Resource usage
 docker stats
 
-# Sprawdź sieć Docker
+# Check Docker network
 docker network ls
 ```
 
-## Rozwiązywanie problemów
+## Troubleshooting
 
-### Problem: Kontenery nie startują
+### Problem: Containers not starting
 
 ```bash
-# Sprawdź logi błędów
+# Check error logs
 docker compose logs
 
-# Sprawdź czy porty są wolne
+# Check if ports are free
 netstat -tuln | grep -E '8000|8501'
-# lub
+# or
 lsof -i :8000
 lsof -i :8501
 ```
 
-### Problem: Błąd "API key not configured"
+### Problem: "API key not configured" error
 
-1. Sprawdź czy `.env` istnieje i zawiera klucze:
+1. Check if `.env` exists and contains keys:
    ```bash
    cat .env
    ```
 
-2. Sprawdź czy zmienne są dostępne w kontenerze:
+2. Check if variables are available in container:
    ```bash
    docker compose exec api env | grep API_KEY
    ```
 
-3. Jeśli używasz eksportu zmiennych, upewnij się, że są dostępne:
+3. If using exported variables, make sure they are available:
    ```bash
    echo $KIE_API_KEY
    echo $OPENROUTER_API_KEY
    ```
 
-### Problem: Frontend nie może połączyć się z API
+### Problem: Frontend cannot connect to API
 
-1. Sprawdź czy API działa:
+1. Check if API is working:
    ```bash
    curl http://localhost:8000/api/health
    ```
 
-2. Sprawdź logi API:
+2. Check API logs:
    ```bash
    docker compose logs api
    ```
 
-3. Sprawdź czy kontenery są w tej samej sieci:
+3. Check if containers are on the same network:
    ```bash
    docker network inspect image_stand_default
    ```
 
-### Problem: Błąd transkrypcji audio
+### Problem: Audio transcription error
 
-1. Sprawdź czy `OPENROUTER_API_KEY` jest ustawiony:
+1. Check if `OPENROUTER_API_KEY` is set:
    ```bash
    docker compose exec api env | grep OPENROUTER
    ```
 
-2. Sprawdź logi API podczas transkrypcji:
+2. Check API logs during transcription:
    ```bash
    docker compose logs -f api
    ```
 
-3. Przetestuj endpoint bezpośrednio:
+3. Test endpoint directly:
    ```bash
    curl -X POST http://localhost:8000/api/speech-to-text \
-     -F "audio=@test_audio.webm"
+     -F "audio=@Test_audio.webm"
    ```
 
-### Problem: Obrazy nie są zapisywane
+### Problem: Images not being saved
 
-1. Sprawdź czy katalog `images/` istnieje:
+1. Check if `images/` directory exists:
    ```bash
    ls -la images/
    ```
 
-2. Sprawdź uprawnienia:
+2. Check permissions:
    ```bash
    chmod 755 images/
    ```
 
-3. Sprawdź logi API:
+3. Check API logs:
    ```bash
    docker compose logs api | grep -i image
    ```
 
-## Aktualizacja aplikacji
+## Update Application
 
 ```bash
-# Zatrzymaj kontenery
+# Stop containers
 docker compose down
 
-# Pobierz najnowsze zmiany (jeśli używasz git)
+# Pull laTest changes (if using git)
 git pull
 
-# Przebuduj i uruchom
+# Rebuild and run
 docker compose up --build -d
 ```
 
-## Czyszczenie
+## Cleanup
 
 ```bash
-# Usuń kontenery, sieci i wolumeny
+# Remove containers, networks and volumes
 docker compose down -v
 
-# Usuń nieużywane obrazy
+# Remove unused images
 docker image prune -a
 
-# Usuń wszystko (ostrożnie!)
+# Remove everything (careful!)
 docker system prune -a --volumes
 ```
 
-## Porty
+## Ports
 
-| Port | Serwis | Opis |
-|------|--------|------|
+| Port | Service | Description |
+|------|---------|-------------|
 | 8000 | API | FastAPI backend |
-| 8501 | Frontend | Streamlit aplikacja |
+| 8501 | Frontend | Streamlit application |
 
-Jeśli porty są zajęte, możesz je zmienić w `docker-compose.yml`:
+If ports are in use, you can change them in `docker-compose.yml`:
 
 ```yaml
 ports:
-  - "8001:8000"  # Zmień 8000 na 8001
-  - "8502:8501"  # Zmień 8501 na 8502
+  - "8001:8000"  # Change 8000 to 8001
+  - "8502:8501"  # Change 8501 to 8502
 ```
 
-## Wsparcie
+## Support
 
-W razie problemów:
-1. Sprawdź logi: `docker compose logs`
-2. Sprawdź status: `docker compose ps`
-3. Sprawdź dokumentację API: http://localhost:8000/docs
+If you encounter problems:
+1. Check logs: `docker compose logs`
+2. Check status: `docker compose ps`
+3. Check API documentation: http://localhost:8000/docs
 
 

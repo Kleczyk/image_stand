@@ -1,97 +1,96 @@
 # 📝 Changelog - Speech-to-Text Feature
 
-## Dodane funkcjonalności
+## Added Features
 
 ### 🎤 Speech-to-Text Endpoint
 
-**Nowy endpoint API:**
-- `POST /api/speech-to-text` - Konwersja mowy na tekst
+**New API endpoint:**
+- `POST /api/speech-to-text` - Speech-to-text conversion
 
-**Szczegóły:**
-- Przyjmuje plik audio (WebM, WAV, MP3, OGG)
-- Wykorzystuje OpenRouter.ai API z modelem Google Gemini 2.0 Flash Lite
-- Zwraca transkrypcję tekstową gotową do użycia jako prompt
+**Details:**
+- Accepts audio files (WebM, WAV, MP3, OGG)
+- Uses OpenRouter.ai API with Google Gemini 2.0 Flash Lite model
+- Returns text transcription ready to use as prompt
 
-**Przykład użycia:**
+**Usage example:**
 ```bash
 curl -X POST http://localhost:8000/api/speech-to-text \
   -F "audio=@recording.webm"
 ```
 
-**Odpowiedź:**
+**Response:**
 ```json
 {
   "success": true,
-  "text": "Transkrypcja tekstowa...",
+  "text": "Transcribed text...",
   "error": null
 }
 ```
 
 ### 🎨 Frontend - Speech-to-Text Interface
 
-**Nowa sekcja w Streamlit:**
-- Sekcja "🎤 Speech-to-Text" z nagrywaniem audio
-- Wyświetlanie transkrypcji jako tekst
-- Możliwość ręcznego kopiowania do pola prompt
+**New section in Streamlit:**
+- "🎤 Speech-to-Text" section with audio recording
+- Display transcription as text
+- Manual copy to prompt field capability
 
-**Funkcjonalności:**
-- Nagrywanie audio przez mikrofon w przeglądarce
-- Odtwarzacz audio do odsłuchania nagrania
-- Przycisk transkrypcji
-- Wyświetlanie transkrypcji w czytelnym formacie
+**Features:**
+- Audio recording via browser microphone
+- Audio player to listen to recording
+- Transcription button
+- Display transcription in readable format
 
-## Zmiany techniczne
+## Technical Changes
 
 ### Backend
 
-1. **Nowy serwis:** `src/services/openrouter_client.py`
-   - Funkcja `transcribe_audio()` do komunikacji z OpenRouter.ai
-   - Obsługa różnych formatów audio (WebM, WAV, MP3, OGG)
-   - Konwersja audio na base64 dla API
+1. **New service:** `src/services/openrouter_client.py`
+   - `transcribe_audio()` function for OpenRouter.ai communication
+   - Support for various audio formats (WebM, WAV, MP3, OGG)
+   - Audio to base64 conversion for API
 
-2. **Rozszerzona konfiguracja:** `src/config.py`
-   - Dodano `openrouter_api_key` do klasy Settings
-   - Wczytywanie z zmiennej środowiskowej `OPENROUTER_API_KEY`
+2. **Extended configuration:** `src/config.py`
+   - Added `openrouter_api_key` to Settings class
+   - Loading from `OPENROUTER_API_KEY` environment variable
 
-3. **Nowy schemat API:** `src/api/schemas.py`
-   - `SpeechToTextResponse` - schemat odpowiedzi dla transkrypcji
+3. **New API schema:** `src/api/schemas.py`
+   - `SpeechToTextResponse` - response schema for transcription
 
-4. **Nowy endpoint:** `src/main.py`
-   - `POST /api/speech-to-text` z pełną walidacją
-   - Obsługa błędów i różnych formatów audio
+4. **New endpoint:** `src/main.py`
+   - `POST /api/speech-to-text` with full validation
+   - Error handling and various audio formats support
 
 ### Frontend
 
-1. **Nowa funkcja:** `frontend/streamlit_app.py`
-   - `speech_to_text()` - wywołanie endpointu API
+1. **New function:** `frontend/streamlit_app.py`
+   - `speech_to_text()` - API endpoint call
 
-2. **Nowa sekcja UI:**
-   - Sekcja "🎤 Speech-to-Text" z nagrywaniem
-   - Wyświetlanie transkrypcji w stylizowanym boxie
-   - Integracja z istniejącym interfejsem generowania obrazów
+2. **New UI section:**
+   - "🎤 Speech-to-Text" section with recording
+   - Display transcription in styled box
+   - Integration with existing image generation interface
 
-### Konfiguracja
+### Configuration
 
-1. **Zmienne środowiskowe:**
-   - `OPENROUTER_API_KEY` - klucz API OpenRouter.ai
-   - Dodano do `env.example` i `docker-compose.yml`
+1. **Environment variables:**
+   - `OPENROUTER_API_KEY` - OpenRouter.ai API key
+   - Added to `env.example` and `docker-compose.yml`
 
-## Wymagania
+## Requirements
 
-- OpenRouter.ai API key (dla transkrypcji mowy)
-- kie.ai API key (dla generowania obrazów)
+- OpenRouter.ai API key (for speech-to-text)
+- kie.ai API key (for image generation)
 
 ## Status
 
-✅ Endpoint API - działa
-✅ Integracja z OpenRouter.ai - działa
-✅ Frontend interface - działa
-⚠️ Automatyczne wklejanie do pola prompt - wymaga poprawy (obecnie ręczne kopiowanie)
+✅ API Endpoint - working
+✅ OpenRouter.ai integration - working
+✅ Frontend interface - working
+⚠️ Automatic paste to prompt field - needs improvement (currently manual copying)
 
-## Następne kroki
+## Next Steps
 
-- Poprawa automatycznego wklejania transkrypcji do pola prompt
-- Obsługa więcej języków
-- Cache'owanie transkrypcji
-- Historia transkrypcji
-
+- Improve automatic paste of transcription to prompt field
+- Support more languages
+- Transcription caching
+- Transcription history

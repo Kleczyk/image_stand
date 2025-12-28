@@ -251,19 +251,19 @@ st.divider()
 st.header("🎤 Speech-to-Text")
 
 # Audio recording section
-st.markdown("**Nagraj audio, aby otrzymać transkrypcję tekstową:**")
-audio_data = st.audio_input("Kliknij mikrofon, aby nagrać", label_visibility="visible")
+st.markdown("**Record audio to get text transcription:**")
+audio_data = st.audio_input("Click microphone to record", label_visibility="visible")
 
 # Show audio player if recorded
 if audio_data:
     st.audio(audio_data, format="audio/webm")
     
     # Transcribe button
-    transcribe_btn = st.button("📝 Transkrybuj audio", type="primary", use_container_width=True)
+    transcribe_btn = st.button("📝 Transcribe Audio", type="primary", use_container_width=True)
     
     # Handle transcription
     if transcribe_btn:
-        with st.spinner("🎤 Transkrypcja audio... (może potrwać kilka sekund)"):
+        with st.spinner("🎤 Transcribing audio... (this may take a few seconds)"):
             audio_bytes = audio_data.read()
             result = speech_to_text(audio_bytes, "recording.webm")
             
@@ -272,17 +272,17 @@ if audio_data:
                 if transcribed_text:
                     # Save transcription to session state
                     st.session_state.transcribed_text = transcribed_text
-                    st.success("✅ Audio zostało przetranskrybowane!")
+                    st.success("✅ Audio transcribed successfully!")
                 else:
-                    st.warning("⚠️ Transkrypcja zwróciła pusty tekst")
+                    st.warning("⚠️ Transcription returned empty text")
             else:
                 error_msg = result.get("error", "Unknown error")
-                st.error(f"❌ Błąd transkrypcji: {error_msg}")
+                st.error(f"❌ Transcription error: {error_msg}")
 
 # Display transcription as text
 if "transcribed_text" in st.session_state and st.session_state.transcribed_text:
     st.divider()
-    st.markdown("### 📝 Transkrypcja:")
+    st.markdown("### 📝 Transcription:")
     st.markdown(f"""
     <div style="background-color: #2d2d44; padding: 20px; border-radius: 10px; border-left: 4px solid #a855f7;">
         <p style="font-size: 16px; line-height: 1.6; color: #eee; margin: 0;">
@@ -290,7 +290,7 @@ if "transcribed_text" in st.session_state and st.session_state.transcribed_text:
         </p>
     </div>
     """, unsafe_allow_html=True)
-    st.caption("💡 Możesz skopiować ten tekst i wkleić go do pola prompt poniżej")
+    st.caption("💡 You can copy this text and paste it into the prompt field below")
 
 # Prompt input section
 st.divider()

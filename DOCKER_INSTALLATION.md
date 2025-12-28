@@ -2,7 +2,7 @@
 
 ## Instalacja Docker (Ubuntu/Debian)
 
-### Krok 1: Aktualizacja systemu
+### Krok 1: Update systemu
 
 ```bash
 sudo apt update
@@ -19,7 +19,7 @@ sudo apt install -y \
     lsb-release
 ```
 
-### Krok 3: Dodanie oficjalnego klucza GPG Dockera
+### Krok 3: Dodanie oficjalnego keya GPG Dockera
 
 ```bash
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -45,19 +45,19 @@ sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin d
 ### Krok 6: Weryfikacja instalacji
 
 ```bash
-# Sprawdź wersję Dockera
+# Check wersję Dockera
 docker --version
 
-# Sprawdź wersję Docker Compose
+# Check wersję Docker Compose
 docker compose version
 
-# Test uruchomienia
+# Test starting
 sudo docker run hello-world
 ```
 
 ## Dodanie użytkownika do grupy docker
 
-### Krok 1: Utworzenie grupy docker (jeśli nie istnieje)
+### Krok 1: Ucreating grupy docker (if does not exist)
 
 ```bash
 sudo groupadd docker
@@ -66,17 +66,17 @@ sudo groupadd docker
 ### Krok 2: Dodanie użytkownika do grupy docker
 
 ```bash
-# Zastąp $USER swoją nazwą użytkownika lub użyj:
+# Replace $USER swoją nazwą użytkownika lub użyj:
 sudo usermod -aG docker $USER
 
-# Lub dla konkretnego użytkownika:
+# Lub for konkretnego użytkownika:
 sudo usermod -aG docker twoja_nazwa_uzytkownika
 ```
 
 ### Krok 3: Weryfikacja członkostwa w grupie
 
 ```bash
-# Sprawdź czy użytkownik jest w grupie docker
+# Check czy użytkownik jest w grupie docker
 groups
 
 # Powinno pokazać "docker" w liście grup
@@ -84,7 +84,7 @@ groups
 
 ### Krok 4: Aktywacja zmian
 
-**WAŻNE**: Po dodaniu użytkownika do grupy, musisz:
+**IMPORTANT**: Po dodaniu użytkownika do grupy, you must:
 
 1. **Wylogować się i zalogować ponownie**, LUB
 2. **Użyć `newgrp docker`** w bieżącej sesji:
@@ -99,32 +99,32 @@ newgrp docker
 # Teraz powinno działać bez sudo:
 docker run hello-world
 
-# Jeśli nadal wymaga sudo, sprawdź:
+# If nadal requires sudo, check:
 docker ps
 ```
 
-## Rozwiązywanie problemów
+## Troubleshooting problems
 
 ### Problem: "permission denied" przy użyciu dockera bez sudo
 
-1. **Sprawdź czy użytkownik jest w grupie docker:**
+1. **Check czy użytkownik jest w grupie docker:**
    ```bash
    groups | grep docker
    ```
 
-2. **Jeśli nie widzisz "docker", dodaj ponownie:**
+2. **If nie widzisz "docker", add ponownie:**
    ```bash
    sudo usermod -aG docker $USER
    newgrp docker
    ```
 
-3. **Sprawdź uprawnienia do socka Dockera:**
+3. **Check uprawnienia do socka Dockera:**
    ```bash
    ls -la /var/run/docker.sock
    # Powinno pokazać: srw-rw---- 1 root docker
    ```
 
-4. **Jeśli uprawnienia są nieprawidłowe:**
+4. **If uprawnienia są nieprawidłowe:**
    ```bash
    sudo chown root:docker /var/run/docker.sock
    sudo chmod 666 /var/run/docker.sock
@@ -133,10 +133,10 @@ docker ps
 ### Problem: Docker nie startuje
 
 ```bash
-# Sprawdź status serwisu
+# Check status serviceu
 sudo systemctl status docker
 
-# Uruchom serwis
+# Start service
 sudo systemctl start docker
 
 # Włącz autostart
@@ -146,42 +146,42 @@ sudo systemctl enable docker
 ### Problem: Docker Compose nie działa
 
 ```bash
-# Sprawdź czy plugin jest zainstalowany
+# Check czy plugin jest zainstalowany
 docker compose version
 
-# Jeśli nie działa, zainstaluj osobno:
+# If nie działa, zainstaluj osobno:
 sudo apt install docker-compose-plugin
 ```
 
 ## Instalacja Docker Compose (standalone - opcjonalnie)
 
-Jeśli wolisz używać `docker-compose` (z myślnikiem) zamiast `docker compose`:
+If wolisz używać `docker-compose` (z myślnikiem) instead of `docker compose`:
 
 ```bash
-# Pobierz najnowszą wersję
-DOCKER_COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
+# Pull najnowszą wersję
+DOCKER_COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/laTest | grep 'tag_name' | cut -d\" -f4)
 sudo curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
 # Nadaj uprawnienia wykonywania
 sudo chmod +x /usr/local/bin/docker-compose
 
-# Sprawdź instalację
+# Check instalację
 docker-compose --version
 ```
 
 ## Szybka weryfikacja
 
-Po instalacji uruchom:
+Po instalacji start:
 
 ```bash
-# 1. Sprawdź wersje
+# 1. Check wersje
 docker --version
 docker compose version
 
 # 2. Test bez sudo
 docker run hello-world
 
-# 3. Sprawdź czy możesz uruchomić kontenery
+# 3. Check czy you can startić containers
 docker ps
 
 # 4. Test Docker Compose
@@ -194,43 +194,43 @@ docker compose version
 # Włącz autostart (powinno być już włączone)
 sudo systemctl enable docker
 
-# Sprawdź status
+# Check status
 sudo systemctl status docker
 ```
 
-## Odinstalowanie Dockera (jeśli potrzebne)
+## Odinstalowanie Dockera (if potrzebne)
 
 ```bash
-# Zatrzymaj Docker
+# Stop Docker
 sudo systemctl stop docker
 
 # Odinstaluj pakiety
 sudo apt purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-# Usuń obrazy, kontenery, wolumeny i sieci
+# Remove obrazy, containers, wolumeny i sieci
 sudo rm -rf /var/lib/docker
 sudo rm -rf /var/lib/containerd
 ```
 
 ## Alternatywna instalacja (skrypt automatyczny)
 
-Docker udostępnia oficjalny skrypt instalacyjny:
+Docker uaccessnia oficjalny skrypt instalacyjny:
 
 ```bash
-# Pobierz i uruchom skrypt
+# Pull i start skrypt
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 
-# Dodaj użytkownika do grupy
+# Add użytkownika do grupy
 sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-**Uwaga**: Używaj oficjalnego skryptu tylko jeśli ufasz źródłu.
+**Uwaga**: Używaj oficjalnego skryptu tylko if ufasz źródłu.
 
 ## Sprawdzenie konfiguracji
 
-Po instalacji sprawdź:
+Po instalacji check:
 
 ```bash
 # 1. Wersja Dockera
@@ -242,10 +242,10 @@ docker compose version
 # 3. Użytkownik w grupie docker
 groups
 
-# 4. Test uruchomienia kontenera
+# 4. Test starting kontenera
 docker run hello-world
 
-# 5. Status serwisu
+# 5. Status serviceu
 sudo systemctl status docker
 ```
 
@@ -253,23 +253,23 @@ sudo systemctl status docker
 
 Po zainstalowaniu Dockera:
 
-1. **Skonfiguruj projekt Image Stand:**
+1. **Configure projekt Image Stand:**
    ```bash
    cd /home/dk/repos/image_stand
    cp env.example .env
-   nano .env  # Dodaj klucze API
+   nano .env  # Add API keys
    ```
 
-2. **Uruchom aplikację:**
+2. **Start application:**
    ```bash
    docker compose up --build -d
    ```
 
-3. **Sprawdź status:**
+3. **Check status:**
    ```bash
    docker compose ps
    ```
 
-Zobacz [INSTALLATION.md](INSTALLATION.md) dla dalszych instrukcji.
+See [INSTALLATION.md](INSTALLATION.md) for dalszych instructions.
 
 
