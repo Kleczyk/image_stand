@@ -66,19 +66,50 @@ def generate_image(prompt: str, image_url: str = None) -> dict:
     return response.json()
 
 
-def compare_images(image1_bytes: bytes, image2_bytes: bytes) -> dict:
+def compare_images(image1_bytes: bytes, image2_bytes: bytes, method: str = None, sensitivity: float = None) -> dict:
     """Compare two images."""
     url = get_api_url()
     files = {
         "image1": ("image1.png", image1_bytes, "image/png"),
         "image2": ("image2.png", image2_bytes, "image/png"),
     }
+    data = {}
+    if method:
+        data["method"] = method
+    if sensitivity is not None:
+        data["sensitivity"] = str(sensitivity)
+    
     response = requests.post(
         f"{url}/compare",
         files=files,
-        timeout=30
+        data=data,
+        timeout=90  # Increased timeout for CLIP model loading
     )
     return response.json()
+
+
+def get_sensitivity() -> dict:
+    """Get current sensitivity value."""
+    url = get_api_url()
+    try:
+        response = requests.get(f"{url}/sensitivity", timeout=5)
+        return response.json()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+def set_sensitivity(sensitivity: float) -> dict:
+    """Set sensitivity value."""
+    url = get_api_url()
+    try:
+        response = requests.post(
+            f"{url}/sensitivity",
+            json={"sensitivity": sensitivity},
+            timeout=10
+        )
+        return response.json()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 def load_image_from_url(url: str) -> bytes:
@@ -157,6 +188,16 @@ if "reference_image" not in st.session_state:
     st.session_state.reference_image = None
 if "best_score" not in st.session_state:
     st.session_state.best_score = 0
+if "sensitivity" not in st.session_state:
+    # Try to get current sensitivity from API
+    try:
+        sensitivity_result = get_sensitivity()
+        if sensitivity_result.get("success"):
+            st.session_state.sensitivity = sensitivity_result.get("sensitivity", 1.0)
+        else:
+            st.session_state.sensitivity = 1.0
+    except:
+        st.session_state.sensitivity = 1.0
 
 # Title
 st.title("🎨 Image Generation Game")
@@ -198,6 +239,53 @@ with st.sidebar:
     # Best score
     st.divider()
     st.metric("🏆 Best Score", f"{st.session_state.best_score:.1f}%")
+    
+    # Similarity Rigour/Sensitivity
+    st.divider()
+    st.header("🎯 Similarity Rigour")
+    st.caption("Higher = More Strict (Lower Scores)\nLower = More Lenient (Higher Scores)")
+    
+    sensitivity = st.slider(
+        "Rigour Level",
+        min_value=0.1,
+        max_value=10.0,
+        value=st.session_state.sensitivity,
+        step=0.1,
+        help="Higher values (2.0-5.0) make comparison more strict, resulting in lower similarity scores. Lower values (0.5-0.8) make it more lenient."
+    )
+    
+    if sensitivity != st.session_state.sensitivity:
+        # Update sensitivity in API
+        result = set_sensitivity(sensitivity)
+        if result.get("success"):
+            st.session_state.sensitivity = sensitivity
+            st.success(f"✅ Rigour set to {sensitivity:.1f}")
+        else:
+            st.error(f"❌ Failed to set rigour: {result.get('message', 'Unknown error')}")
+    
+    # Show current value
+    st.info(f"**Current:** {st.session_state.sensitivity:.1f}")
+    
+    # Quick presets
+    col_preset1, col_preset2, col_preset3 = st.columns(3)
+    with col_preset1:
+        if st.button("Lenient\n(0.5)", use_container_width=True):
+            result = set_sensitivity(0.5)
+            if result.get("success"):
+                st.session_state.sensitivity = 0.5
+                st.rerun()
+    with col_preset2:
+        if st.button("Normal\n(1.0)", use_container_width=True):
+            result = set_sensitivity(1.0)
+            if result.get("success"):
+                st.session_state.sensitivity = 1.0
+                st.rerun()
+    with col_preset3:
+        if st.button("Strict\n(3.0)", use_container_width=True):
+            result = set_sensitivity(3.0)
+            if result.get("success"):
+                st.session_state.sensitivity = 3.0
+                st.rerun()
 
 # Main content
 if not st.session_state.reference_image:
@@ -220,10 +308,11 @@ with col2:
             current_image = load_image_from_url(st.session_state.current_image_url)
             st.image(current_image, use_container_width=True)
             
-            # Compare with reference
+            # Compare with reference (use current sensitivity)
             result = compare_images(
                 st.session_state.reference_image,
-                current_image
+                current_image,
+                sensitivity=st.session_state.sensitivity
             )
             
             if result.get("success"):
