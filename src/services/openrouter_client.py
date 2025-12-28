@@ -18,7 +18,7 @@ async def transcribe_audio(audio_bytes: bytes, mime_type: str = "audio/webm") ->
     
     Raises:
         ValueError: If API key is not configured
-        httpx.HTTPError: If API request fails
+        httpx.HTTPStatusError: If API request fails
     """
     if not settings.openrouter_api_key:
         raise ValueError("OpenRouter API key not configured. Set OPENROUTER_API_KEY environment variable.")
@@ -31,8 +31,8 @@ async def transcribe_audio(audio_bytes: bytes, mime_type: str = "audio/webm") ->
     
     # Prepare request payload
     # OpenRouter uses OpenAI-compatible format
-    # For Gemini models with audio, we use the multimodal content format
-    # Gemini accepts audio in the same format as images (data URI in content array)
+    # For Gemini models with audio, we use image_url format (same as images)
+    # Gemini accepts audio via data URI in image_url format
     payload = {
         "model": "google/gemini-2.0-flash-lite-001",
         "messages": [
@@ -44,9 +44,9 @@ async def transcribe_audio(audio_bytes: bytes, mime_type: str = "audio/webm") ->
                         "text": "Transcribe this audio to text. Return only the transcribed text without any additional commentary."
                     },
                     {
-                        "type": "input_audio",
-                        "input_audio": {
-                            "data": data_uri
+                        "type": "image_url",
+                        "image_url": {
+                            "url": data_uri
                         }
                     }
                 ]
@@ -76,7 +76,7 @@ async def transcribe_audio(audio_bytes: bytes, mime_type: str = "audio/webm") ->
                 error_msg = error_json.get("error", {}).get("message", error_text)
             except:
                 error_msg = error_text
-            raise httpx.HTTPError(
+            raise httpx.HTTPStatusError(
                 f"OpenRouter API error (HTTP {response.status_code}): {error_msg}",
                 request=response.request,
                 response=response,
