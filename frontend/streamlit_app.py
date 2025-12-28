@@ -273,6 +273,7 @@ if audio_data:
                     # Save transcription to session state
                     st.session_state.transcribed_text = transcribed_text
                     st.success("✅ Audio transcribed successfully!")
+                    st.rerun()  # Refresh to show transcription
                 else:
                     st.warning("⚠️ Transcription returned empty text")
             else:
