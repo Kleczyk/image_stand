@@ -19,6 +19,7 @@ class CompareImagesResponse(BaseModel):
     success: bool
     similarity_score: Optional[float] = None
     similarity_percentage: Optional[float] = None
+    method: Optional[str] = None  # "ssim", "embeddings", or "hybrid"
     error: Optional[str] = None
 
 
@@ -45,3 +46,15 @@ class SpeechToTextResponse(BaseModel):
     success: bool
     text: Optional[str] = None
     error: Optional[str] = None
+
+
+class SensitivityRequest(BaseModel):
+    """Request schema for sensitivity/rigour update."""
+    sensitivity: float
+
+
+class SensitivityResponse(BaseModel):
+    """Response schema for sensitivity operations."""
+    success: bool
+    message: str
+    sensitivity: Optional[float] = None
