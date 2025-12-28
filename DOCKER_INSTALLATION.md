@@ -273,3 +273,4 @@ Po zainstalowaniu Dockera:
 See [INSTALLATION.md](INSTALLATION.md) for dalszych instructions.
 
 
+

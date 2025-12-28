@@ -193,3 +193,4 @@ echo "  2. Recreate container: docker compose up -d --force-recreate api"
 echo "  3. Check logs: docker compose logs api | grep -i openrouter"
 echo ""
 
+
