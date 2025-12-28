@@ -20,6 +20,10 @@ venv/
 # Testing
 test_*.png
 !test_local_copy.png
+test.mp3
+test.*.mp3
+test.*.wav
+test.*.webm
 
 # Docker volumes
 images/
